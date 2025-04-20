@@ -7,10 +7,12 @@ from bs4 import BeautifulSoup
 from crawl4ai import AsyncWebCrawler
 
 STATE_FILE = "scraper/state.json"
-SAVE_FOLDER = "scraper"
+SAVE_FOLDER = "scraper/scraped_data"
 MAX_FILES_PER_REPO = 25000
 MAX_MB_PER_REPO = 1024  # 1GB max
 ARTICLES_PER_DAY = 3    # Scrape 2–3 full articles per day
+
+os.makedirs(SAVE_FOLDER, exist_ok=True)
 
 def load_state():
     with open(STATE_FILE, 'r') as f:
@@ -31,11 +33,8 @@ def extract_clean_text_from_html(html):
 
     if content_div:
         for tag in content_div.find_all(['p', 'h2', 'h3']):
-            # Skip if empty
             if tag.name == 'p' and tag.get_text(strip=True) == "":
                 continue
-
-            # Remove unwanted tags
             for sup in tag.find_all('sup'):
                 sup.decompose()
             for span in tag.find_all('span', class_='mw-editsection'):
@@ -44,8 +43,6 @@ def extract_clean_text_from_html(html):
                 table.decompose()
 
             text = tag.get_text(separator=' ', strip=True)
-
-            # Remove specific sections like Track Listing, References, External links
             if any(x in text.lower() for x in ['track listing', 'references', 'external links', 'see also']):
                 continue
 
@@ -97,7 +94,6 @@ async def scrape_articles():
     state['current_file_number'] += 1
     save_state(state)
 
-    # Check repo limits
     if state['current_file_number'] > MAX_FILES_PER_REPO:
         subprocess.run(["python", "scraper/rotate_repo.py"])
 
