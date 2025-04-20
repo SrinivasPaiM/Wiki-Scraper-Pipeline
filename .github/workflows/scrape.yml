@@ -25,7 +25,6 @@ jobs:
           path: |
             ~/.cache/pip
             ~/.npm
-            # Cache playwright browsers
             ~/.cache/ms-playwright
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}-${{ hashFiles('scraper/playwright_browsers.txt') }}
           restore-keys: |
@@ -53,10 +52,8 @@ jobs:
           git config --global user.name "${{ github.actor }}"
           git config --global user.email "${{ github.actor }}@users.noreply.github.com"
 
-          # Read repo index from state.json
           REPO_INDEX=$(jq '.repo_index' scraper/state.json)
           TARGET_REPO="wikiscraper-$(printf "%03d" $REPO_INDEX)"
-
           echo "📁 Target repo is: $TARGET_REPO"
 
           mkdir temp_data_repo
@@ -70,3 +67,15 @@ jobs:
           git add .
           git commit -m "🗂️ Daily scrape update: $(date -u +'%Y-%m-%d %H:%M:%S')" || echo "🟡 Nothing new to commit"
           git push || echo "⚠️ Push failed, check token and repo permissions"
+
+      - name: 🔄 Push updated state.json back to main repo
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          git config --global user.name "${{ github.actor }}"
+          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+
+          echo "🔁 Updating state.json in main repo..."
+          git add scraper/state.json
+          git commit -m "🔄 Update state.json after scrape"
+          git push || echo "⚠️ Push failed for state.json"
