@@ -76,6 +76,12 @@ jobs:
           git config --global user.email "${{ github.actor }}@users.noreply.github.com"
 
           echo "🔁 Updating state.json in main repo..."
+
+          # ✅ Go back to the main repo root
+          cd "$GITHUB_WORKSPACE"
+
+          git pull origin main
+
           git add scraper/state.json
-          git commit -m "🔄 Update state.json after scrape"
-          git push || echo "⚠️ Push failed for state.json"
+          git commit -m "🔄 Update state.json after scrape" || echo "🟡 Nothing to commit"
+          git push origin HEAD:main || echo "⚠️ Push failed for state.json"
