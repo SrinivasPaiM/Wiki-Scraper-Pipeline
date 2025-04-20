@@ -2,7 +2,7 @@ name: WikiScraper Daily
 
 on:
   schedule:
-    - cron: '0 4 * * *' # daily at 4AM UTC
+    - cron: '0 4 * * *'  # Daily at 4AM UTC
   workflow_dispatch:
 
 jobs:
@@ -30,24 +30,29 @@ jobs:
           GITHUB_ACTOR: ${{ github.actor }}
         run: python scraper/main.py
 
-      - name: Push Scraped Data to Another Repo
+      - name: Push Scraped Data to Correct Repo
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
+          sudo apt-get update && sudo apt-get install -y jq
+
           git config --global user.name "${{ github.actor }}"
           git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+
+          # Read repo index from state.json
+          REPO_INDEX=$(jq '.repo_index' scraper/state.json)
+          TARGET_REPO="wikiscraper-$(printf "%03d" $REPO_INDEX)"
+
+          echo "📁 Target repo is: $TARGET_REPO"
 
           mkdir temp_data_repo
           cd temp_data_repo
 
-          git clone https://${{ secrets.GH_TOKEN }}@github.com/${{ github.repository_owner }}/World-Scraper-Data.git .
+          echo "📥 Cloning https://github.com/${{ github.repository_owner }}/${TARGET_REPO}.git ..."
+          git clone https://${{ secrets.GH_TOKEN }}@github.com/${{ github.repository_owner }}/${TARGET_REPO}.git .
 
           cp -r ../scraper/scraped_data/* . 2>/dev/null || true
 
           git add .
-          git commit -m "🗂️ Daily scrape update: $(date -u +'%Y-%m-%d %H:%M:%S')" || echo "Nothing to commit"
-          git push
-
-          # Optional: cleanup local scraped files
-          cd ../..
-          rm -rf scraper/scraped_data
+          git commit -m "🗂️ Daily scrape update: $(date -u +'%Y-%m-%d %H:%M:%S')" || echo "🟡 Nothing new to commit"
+          git push || echo "⚠️ Push failed, check token and repo permissions"
