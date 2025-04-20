@@ -37,18 +37,17 @@ jobs:
           git config --global user.name "${{ github.actor }}"
           git config --global user.email "${{ github.actor }}@users.noreply.github.com"
 
-          # Create a temp directory
           mkdir temp_data_repo
           cd temp_data_repo
 
-          # Clone the target repo
           git clone https://${{ secrets.GH_TOKEN }}@github.com/${{ github.repository_owner }}/World-Scraper-Data.git .
-          
-          # Copy new scraped content (adjust this path if needed)
-          cp -r ../scraper/scraped_data/* . 2>/dev/null || true
-          cp ../scraper/state.json . || true
 
-          # Commit and push
+          cp -r ../scraper/scraped_data/* . 2>/dev/null || true
+
           git add .
           git commit -m "🗂️ Daily scrape update: $(date -u +'%Y-%m-%d %H:%M:%S')" || echo "Nothing to commit"
           git push
+
+          # Optional: cleanup local scraped files
+          cd ../..
+          rm -rf scraper/scraped_data
