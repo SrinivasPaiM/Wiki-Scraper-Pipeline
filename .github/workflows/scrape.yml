@@ -18,7 +18,7 @@ jobs:
         with:
           python-version: '3.10'
 
-      # Cache Python dependencies
+      
       - name: Cache Python dependencies
         uses: actions/cache@v3
         with:
@@ -54,19 +54,19 @@ jobs:
 
           REPO_INDEX=$(jq '.repo_index' scraper/state.json)
           TARGET_REPO="wikiscraper-$(printf "%03d" $REPO_INDEX)"
-          echo "📁 Target repo is: $TARGET_REPO"
+          echo " Target repo is: $TARGET_REPO"
 
           mkdir temp_data_repo
           cd temp_data_repo
 
-          echo "📥 Cloning https://github.com/${{ github.repository_owner }}/${TARGET_REPO}.git ..."
+          echo " Cloning https://github.com/${{ github.repository_owner }}/${TARGET_REPO}.git ..."
           git clone https://${{ secrets.GH_TOKEN }}@github.com/${{ github.repository_owner }}/${TARGET_REPO}.git .
 
           cp -r ../scraper/scraped_data/* . 2>/dev/null || true
 
           git add .
-          git commit -m "🗂️ Daily scrape update: $(date -u +'%Y-%m-%d %H:%M:%S')" || echo "🟡 Nothing new to commit"
-          git push || echo "⚠️ Push failed, check token and repo permissions"
+          git commit -m "🗂Daily scrape update: $(date -u +'%Y-%m-%d %H:%M:%S')" || echo " Nothing new to commit"
+          git push || echo "Push failed, check token and repo permissions"
 
       - name: 🔄 Push updated state.json back to main repo
         env:
@@ -75,15 +75,15 @@ jobs:
           git config --global user.name "${{ github.actor }}"
           git config --global user.email "${{ github.actor }}@users.noreply.github.com"
 
-          echo "🔁 Updating state.json in main repo..."
+          echo " Updating state.json in main repo..."
           cd "$GITHUB_WORKSPACE"
 
           git checkout main
           git pull origin main
 
-          echo "🔍 Git status before commit:"
+          echo " Git status before commit:"
           git status
 
           git add scraper/state.json
-          git commit -m "🔄 Update state.json after scrape" || echo "🟡 Nothing to commit"
-          git push origin main || echo "⚠️ Push failed for state.json"
+          git commit -m " Update state.json after scrape" || echo " Nothing to commit"
+          git push origin main || echo " Push failed for state.json"
