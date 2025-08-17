@@ -1,6 +1,6 @@
 {
   "repo_index": 1,
-  "current_file_number": 123,
+  "current_file_number": 124,
   "visited_articles": [
     "https://en.wikipedia.org/wiki/Jamie_Johnson_(TV_series)",
     "https://en.wikipedia.org/wiki/Laurel_Futurity_Stakes_top_three_finishers",
@@ -367,6 +367,9 @@
     "https://en.wikipedia.org/wiki/Mechanical_resonance",
     "https://en.wikipedia.org/wiki/List_of_equipment_of_the_Philippine_Army",
     "https://en.wikipedia.org/wiki/Sea_Horses_(novel)",
-    "https://en.wikipedia.org/wiki/I%27m_Awesome"
+    "https://en.wikipedia.org/wiki/I%27m_Awesome",
+    "https://en.wikipedia.org/wiki/North_American_Mission_Board",
+    "https://en.wikipedia.org/wiki/Fort_Durham",
+    "https://en.wikipedia.org/wiki/Slabrock_darter"
   ]
 }
