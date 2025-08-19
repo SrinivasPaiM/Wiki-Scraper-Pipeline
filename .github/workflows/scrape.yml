@@ -86,6 +86,31 @@ jobs:
           GITHUB_ACTOR: ${{ github.actor }}
         run: python scraper/main.py
 
+      - name: Ensure Target Repo Exists
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          REPO_INDEX=$(jq '.repo_index' scraper/state.json)
+          TARGET_REPO="wikiscraper-$(printf "%03d" $REPO_INDEX)"
+          echo "Checking if repo $TARGET_REPO exists..."
+
+          # Check if repo exists via GitHub API
+          STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "Authorization: token $GH_TOKEN" \
+            https://api.github.com/repos/${{ github.repository_owner }}/$TARGET_REPO)
+
+          if [ "$STATUS_CODE" -eq 404 ]; then
+            echo "Repo does not exist. Creating $TARGET_REPO..."
+            curl -s -X POST \
+              -H "Authorization: token $GH_TOKEN" \
+              -H "Accept: application/vnd.github.v3+json" \
+              https://api.github.com/user/repos \
+              -d "{\"name\":\"$TARGET_REPO\",\"private\":false}" \
+              || echo "Failed to create repo. Check token permissions."
+          else
+            echo "Repo $TARGET_REPO already exists."
+          fi
+
       - name: Push Scraped Data to Correct Repo
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
