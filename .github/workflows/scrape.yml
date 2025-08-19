@@ -15,7 +15,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Decide if Scraper Should Run Today
+      - name: Decide if Scraper Should Run Today and Handle Repo Index
         run: |
           python3 <<'EOF'
           import json, random, datetime, sys
@@ -44,6 +44,13 @@ jobs:
           # Increment today's counter
           state["runs_today"] += 1
           print(f"Proceeding: run #{state['runs_today']} of {state['max_runs_today']} for {today}")
+
+          # Check if we need to start a new repo
+          FILE_LIMIT = 150
+          if state.get("current_file_number", 0) >= FILE_LIMIT:
+              state["repo_index"] = state.get("repo_index", 1) + 1
+              state["current_file_number"] = 0
+              print(f"File limit reached. Incrementing repo_index to {state['repo_index']} and resetting current_file_number.")
 
           # Save updated state.json
           with open(state_file, "w") as f:
