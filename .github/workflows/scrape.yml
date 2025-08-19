@@ -2,7 +2,9 @@ name: WikiScraper Daily
 
 on:
   schedule:
-    - cron: '0 4 * * *'  # Daily at 4AM UTC
+    - cron: '0 4 * * *'   # 4 AM UTC
+    - cron: '0 12 * * *'  # 12 PM UTC
+    - cron: '0 20 * * *'  # 8 PM UTC
   workflow_dispatch:
 
 jobs:
@@ -13,12 +15,46 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
+      - name: Decide if Scraper Should Run Today
+        run: |
+          python3 <<'EOF'
+          import json, random, datetime, sys
+          from pathlib import Path
+
+          state_file = Path("scraper/state.json")
+          today = datetime.datetime.utcnow().strftime("%Y-%m-%d")
+
+          # Load existing state.json
+          with open(state_file, "r") as f:
+              state = json.load(f)
+
+          # Initialize or reset daily run tracking
+          if "last_run_date" not in state or state["last_run_date"] != today:
+              state["last_run_date"] = today
+              state["runs_today"] = 0
+              state["max_runs_today"] = random.randint(1, 3)
+
+          # Check if today's limit reached
+          if state["runs_today"] >= state["max_runs_today"]:
+              print(f"Skipping run: already ran {state['runs_today']} times (max {state['max_runs_today']})")
+              with open(state_file, "w") as f:
+                  json.dump(state, f, indent=2)
+              sys.exit(0)
+
+          # Increment today's counter
+          state["runs_today"] += 1
+          print(f"Proceeding: run #{state['runs_today']} of {state['max_runs_today']} for {today}")
+
+          # Save updated state.json
+          with open(state_file, "w") as f:
+              json.dump(state, f, indent=2)
+          EOF
+
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
-      
       - name: Cache Python dependencies
         uses: actions/cache@v3
         with:
