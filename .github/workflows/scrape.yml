@@ -2,9 +2,9 @@ name: WikiScraper Daily
 
 on:
   schedule:
-    - cron: '0 4 * * *'   # 4 AM UTC
-    - cron: '0 12 * * *'  # 12 PM UTC
-    - cron: '0 20 * * *'  # 8 PM UTC
+    - cron: '30 4 * * *'   # 10:00 AM IST
+    - cron: '30 7 * * *'   # 1:00 PM IST
+    - cron: '30 11 * * *'  # 5:00 PM IST
   workflow_dispatch:
 
 jobs:
