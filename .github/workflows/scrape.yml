@@ -18,32 +18,40 @@ jobs:
       - name: Decide if Scraper Should Run Today and Handle Repo Index
         run: |
           python3 <<'EOF'
-          import json, random, datetime, sys
+          import json, random, sys
           from pathlib import Path
+          from datetime import datetime, timedelta, timezone
 
           state_file = Path("scraper/state.json")
-          today = datetime.datetime.utcnow().strftime("%Y-%m-%d")
+
+          # Use IST for daily reset
+          IST = timezone(timedelta(hours=5, minutes=30))
+          today_ist = datetime.now(IST).strftime("%Y-%m-%d")
 
           # Load existing state.json
           with open(state_file, "r") as f:
               state = json.load(f)
 
-          # Initialize or reset daily run tracking
-          if "last_run_date" not in state or state["last_run_date"] != today:
-              state["last_run_date"] = today
+          # Initialize or reset daily run tracking based on IST
+          if "last_run_date" not in state or state["last_run_date"] != today_ist:
+              state["last_run_date"] = today_ist
               state["runs_today"] = 0
               state["max_runs_today"] = random.randint(1, 3)
+              print(f"Daily reset: runs_today=0, max_runs_today={state['max_runs_today']}")
 
           # Check if today's limit reached
           if state["runs_today"] >= state["max_runs_today"]:
               print(f"Skipping run: already ran {state['runs_today']} times (max {state['max_runs_today']})")
+              # Save state before exiting
               with open(state_file, "w") as f:
                   json.dump(state, f, indent=2)
               sys.exit(0)
 
-          # Increment today's counter
+          # Increment today's counter and save immediately
           state["runs_today"] += 1
-          print(f"Proceeding: run #{state['runs_today']} of {state['max_runs_today']} for {today}")
+          print(f"Proceeding: run #{state['runs_today']} of {state['max_runs_today']} for {today_ist}")
+          with open(state_file, "w") as f:
+              json.dump(state, f, indent=2)
 
           # Check if we need to start a new repo
           FILE_LIMIT = 150
@@ -52,7 +60,7 @@ jobs:
               state["current_file_number"] = 0
               print(f"File limit reached. Incrementing repo_index to {state['repo_index']} and resetting current_file_number.")
 
-          # Save updated state.json
+          # Save updated state.json again to ensure all changes persist
           with open(state_file, "w") as f:
               json.dump(state, f, indent=2)
           EOF
@@ -94,7 +102,6 @@ jobs:
           TARGET_REPO="wikiscraper-$(printf "%03d" $REPO_INDEX)"
           echo "Checking if repo $TARGET_REPO exists..."
 
-          # Check if repo exists via GitHub API
           STATUS_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
             -H "Authorization: token $GH_TOKEN" \
             https://api.github.com/repos/${{ github.repository_owner }}/$TARGET_REPO)
@@ -125,9 +132,7 @@ jobs:
           mkdir temp_data_repo
           cd temp_data_repo
 
-          echo "Cloning https://github.com/${{ github.repository_owner }}/${TARGET_REPO}.git ..."
           git clone https://${{ secrets.GH_TOKEN }}@github.com/${{ github.repository_owner }}/${TARGET_REPO}.git .
-
           cp -r ../scraper/scraped_data/* . 2>/dev/null || true
 
           git add .
@@ -146,9 +151,6 @@ jobs:
 
           git checkout main
           git pull origin main
-
-          echo "Git status before commit:"
-          git status
 
           git add scraper/state.json
           git commit -m "Update state.json after scrape" || echo "Nothing to commit"
