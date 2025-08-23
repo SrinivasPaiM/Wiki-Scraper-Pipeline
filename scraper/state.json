@@ -1,9 +1,9 @@
 {
   "repo_index": 1,
-  "current_file_number": 139,
-  "last_run_date": "2025-08-22",
+  "current_file_number": 140,
+  "last_run_date": "2025-08-23",
   "runs_today": 1,
-  "max_runs_today": 1,
+  "max_runs_today": 2,
   "visited_articles": [
     "https://en.wikipedia.org/wiki/Jamie_Johnson_(TV_series)",
     "https://en.wikipedia.org/wiki/Laurel_Futurity_Stakes_top_three_finishers",
@@ -418,6 +418,9 @@
     "https://en.wikipedia.org/wiki/Palawan_blue_flycatcher",
     "https://en.wikipedia.org/wiki/The_Sphinx_(song)",
     "https://en.wikipedia.org/wiki/Apospasta_eriopygioides",
-    "https://en.wikipedia.org/wiki/List_of_Israeli_films_of_2009"
+    "https://en.wikipedia.org/wiki/List_of_Israeli_films_of_2009",
+    "https://en.wikipedia.org/wiki/Audrey_Whitby",
+    "https://en.wikipedia.org/wiki/Thochu_bent-toed_gecko",
+    "https://en.wikipedia.org/wiki/Dorcadion_regulare"
   ]
 }
