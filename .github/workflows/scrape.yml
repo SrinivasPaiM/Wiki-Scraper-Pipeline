@@ -15,7 +15,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      - name: Decide if Scraper Should Run Today and Handle Repo Index
+      - name: Daily Random Commit Gating
         run: |
           python3 <<'EOF'
           import json, random, sys
@@ -29,25 +29,25 @@ jobs:
           today_ist = datetime.now(IST).strftime("%Y-%m-%d")
 
           # Load existing state.json
-          with open(state_file, "r") as f:
-              state = json.load(f)
+          if state_file.exists():
+              with open(state_file, "r") as f:
+                  state = json.load(f)
+          else:
+              state = {}
 
-          # Initialize or reset daily run tracking based on IST
+          # Daily random commit gating (max 3 per day)
           if "last_run_date" not in state or state["last_run_date"] != today_ist:
               state["last_run_date"] = today_ist
               state["runs_today"] = 0
               state["max_runs_today"] = random.randint(1, 3)
               print(f"Daily reset: runs_today=0, max_runs_today={state['max_runs_today']}")
 
-          # Check if today's limit reached
           if state["runs_today"] >= state["max_runs_today"]:
               print(f"Skipping run: already ran {state['runs_today']} times (max {state['max_runs_today']})")
-              # Save state before exiting
               with open(state_file, "w") as f:
                   json.dump(state, f, indent=2)
               sys.exit(0)
 
-          # Increment today's counter and save immediately
           state["runs_today"] += 1
           print(f"Proceeding: run #{state['runs_today']} of {state['max_runs_today']} for {today_ist}")
           with open(state_file, "w") as f:
