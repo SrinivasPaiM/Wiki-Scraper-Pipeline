@@ -46,7 +46,7 @@ jobs:
               print(f"Skipping run: already ran {state['runs_today']} times (max {state['max_runs_today']})")
               with open(state_file, "w") as f:
                   json.dump(state, f, indent=2)
-              sys.exit(0)
+              sys.exit(1)
 
           state["runs_today"] += 1
           print(f"Proceeding: run #{state['runs_today']} of {state['max_runs_today']} for {today_ist}")
