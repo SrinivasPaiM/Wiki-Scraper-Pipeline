@@ -1,8 +1,8 @@
 {
   "repo_index": 1,
-  "current_file_number": 145,
+  "current_file_number": 146,
   "last_run_date": "2025-08-25",
-  "runs_today": 1,
+  "runs_today": 2,
   "max_runs_today": 3,
   "visited_articles": [
     "https://en.wikipedia.org/wiki/Jamie_Johnson_(TV_series)",
@@ -436,6 +436,9 @@
     "https://en.wikipedia.org/wiki/Lou_Bierbauer",
     "https://en.wikipedia.org/wiki/Crassispira_asthenes",
     "https://en.wikipedia.org/wiki/1939_Drexel_Dragons_football_team",
-    "https://en.wikipedia.org/wiki/Geothermal_power_in_Germany"
+    "https://en.wikipedia.org/wiki/Geothermal_power_in_Germany",
+    "https://en.wikipedia.org/wiki/Bodil_Thirstedt",
+    "https://en.wikipedia.org/wiki/Syssitia",
+    "https://en.wikipedia.org/wiki/Trigonectes"
   ]
 }
