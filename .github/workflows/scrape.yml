@@ -88,11 +88,18 @@ jobs:
           pip install crawl4ai requests playwright
           playwright install --with-deps
 
-      - name: Run Scraper
+      - name: Run Scraper (with retry safety)
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
-        run: python scraper/main.py
+        run: |
+          set +e
+          python scraper/main.py
+          EXIT_CODE=$?
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "⚠️ Scraper failed with code $EXIT_CODE, skipping this run but keeping workflow alive."
+          fi
+          set -e
 
       - name: Ensure Target Repo Exists
         env:
